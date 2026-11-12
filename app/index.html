@@ -1,4 +1,5 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caldeirão App</title><meta name="robots" content="noindex">
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caldeirão App</title><meta name="robots" content="noindex"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com; connect-src 'self' https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; object-src 'none'; base-uri 'none'; form-action 'self' mailto:">
+<style>html{display:none}</style><script>if(self===top){document.write("<style>html{display:block!important}</style>")}else{try{top.location=self.location.href}catch(e){}}</script>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(120% 70% at 50% 30%,#3B1C86,#1B0C40 55%,#0D0622);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff}
 form{width:min(360px,calc(100% - 36px));padding:24px 20px;border-radius:24px;background:linear-gradient(165deg,#2E1A63,#1E1046);border:1px solid rgba(232,196,106,.35);box-shadow:0 24px 60px rgba(0,0,0,.5);text-align:center}
 h1{margin:0 0 6px;font-size:22px;color:#FFE7A3}p{margin:0 0 16px;color:#D9CCF5;font-size:14px;line-height:1.5}
@@ -8,11 +9,17 @@ button{width:100%;height:48px;border:0;border-radius:14px;background:linear-grad
 <body><form id="f"><h1>Caldeirão App</h1><p>Protótipo privado. Digite a senha de acesso.</p><input id="s" type="password" placeholder="Senha" autocomplete="current-password" autofocus><label><input type="checkbox" id="l" checked>Lembrar neste aparelho</label><button>Entrar</button><div class="er" id="e"></div></form>
 <script>
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function abre(senha,lembrar){const d=await (await fetch("app.enc?v=1794463993")).json();const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(senha),"PBKDF2",false,["deriveKey"]);
- const k=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(d.s),iterations:d.n,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
- const html=new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(d.i)},k,b64(d.c)));
- try{if(lembrar)localStorage.setItem("cf-acesso",senha);else sessionStorage.setItem("cf-acesso",senha)}catch(e){}
+const db=()=>new Promise((ok,er)=>{const q=indexedDB.open("cf-gate",1);q.onupgradeneeded=()=>q.result.createObjectStore("k");q.onsuccess=()=>ok(q.result);q.onerror=er});
+const kGet=async()=>{try{const d=await db();return await new Promise(ok=>{const q=d.transaction("k").objectStore("k").get("k");q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}};
+const kPut=async k=>{try{const d=await db();d.transaction("k","readwrite").objectStore("k").put(k,"k")}catch(e){}};
+const kDel=async()=>{try{const d=await db();d.transaction("k","readwrite").objectStore("k").delete("k")}catch(e){}};
+let D=null;const dados=async()=>D||(D=await (await fetch("app.enc?v=1794464775",{cache:"no-store"})).json());
+async function chave(senha){const d=await dados();const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(senha),"PBKDF2",false,["deriveKey"]);
+ return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(d.s),iterations:d.n,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"])}
+async function abre(k){const d=await dados();const html=new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(d.i)},k,b64(d.c)));
  document.open();document.write(html);document.close()}
-document.getElementById("f").onsubmit=async e=>{e.preventDefault();document.getElementById("e").textContent="";try{await abre(document.getElementById("s").value,document.getElementById("l").checked)}catch(x){document.getElementById("e").textContent="Senha errada."}};
-let g=null;try{g=localStorage.getItem("cf-acesso")||sessionStorage.getItem("cf-acesso")}catch(e){}if(g)abre(g,true).catch(()=>{try{localStorage.removeItem("cf-acesso")}catch(e){}});
+let velha=null;try{velha=localStorage.getItem("cf-acesso")||sessionStorage.getItem("cf-acesso");localStorage.removeItem("cf-acesso");sessionStorage.removeItem("cf-acesso")}catch(e){}
+document.getElementById("f").onsubmit=async e=>{e.preventDefault();const er=document.getElementById("e"),bt=document.querySelector("form button");er.textContent="";bt.disabled=true;bt.textContent="Abrindo...";
+ try{const k=await chave(document.getElementById("s").value);if(document.getElementById("l").checked)await kPut(k);else await kDel();await abre(k)}catch(x){er.textContent="Senha errada.";bt.disabled=false;bt.textContent="Entrar"}};
+kGet().then(async k=>{if(!k&&velha){try{k=await chave(velha);await kPut(k)}catch(e){k=null}}if(k)abre(k).catch(()=>kDel())});
 </script></body></html>

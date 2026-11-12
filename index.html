@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; frame-src https://www.instagram.com https://www.youtube.com; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Caldeirão App</title>
 <meta name="description" content="O app de fãs do canal Caldeirão Furado. Acervo do Papo Furado, biblioteca bilíngue, fórum, notícias e muito mais.">
@@ -107,7 +108,7 @@ dialog p{color:var(--soft);font-size:14px}
   <div>
    <h1>Caldeirão App</h1>
    <p>O app dos bruxões. Tudo do canal num lugar só.</p>
-   <div class="acoes"><a class="btn ouro" href="app/">Entrar no app</a><a class="btn sec" href="https://www.youtube.com/@caldeiraofuradooficial" target="_blank">Ver o canal</a></div>
+   <div class="acoes"><a class="btn ouro" href="app/">Entrar no app</a><a class="btn sec" href="https://www.youtube.com/@caldeiraofuradooficial" target="_blank" rel="noopener noreferrer">Ver o canal</a></div>
    <span class="selo">Abre no navegador do celular e do computador. Não precisa baixar nada.</span>
   </div>
   <div class="fone"><video src="videos/entrada.mp4" autoplay muted loop playsinline></video></div>
@@ -130,16 +131,16 @@ dialog p{color:var(--soft);font-size:14px}
 
  <section id="links"><h2>Onde encontrar o Caco</h2><p class="sub">Todos os canais oficiais</p>
   <div class="links">
-   <a class="lk" href="https://www.youtube.com/@caldeiraofuradooficial" target="_blank"><img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=128" alt=""><div><b>YouTube</b><small>1,67 mi inscritos</small></div></a>
-   <a class="lk" href="https://www.instagram.com/cacocardassi/" target="_blank"><img src="https://www.google.com/s2/favicons?domain=instagram.com&sz=128" alt=""><div><b>Instagram</b><small>@cacocardassi</small></div></a>
-   <a class="lk" href="https://livepix.gg/caldeiraofurado" target="_blank"><img src="https://www.google.com/s2/favicons?domain=livepix.gg&sz=128" alt=""><div><b>LivePix</b><small>Perguntas do Papo Furado</small></div></a>
+   <a class="lk" href="https://www.youtube.com/@caldeiraofuradooficial" target="_blank" rel="noopener noreferrer"><img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=128" alt=""><div><b>YouTube</b><small>1,67 mi inscritos</small></div></a>
+   <a class="lk" href="https://www.instagram.com/cacocardassi/" target="_blank" rel="noopener noreferrer"><img src="https://www.google.com/s2/favicons?domain=instagram.com&sz=128" alt=""><div><b>Instagram</b><small>@cacocardassi</small></div></a>
+   <a class="lk" href="https://livepix.gg/caldeiraofurado" target="_blank" rel="noopener noreferrer"><img src="https://www.google.com/s2/favicons?domain=livepix.gg&sz=128" alt=""><div><b>LivePix</b><small>Perguntas do Papo Furado</small></div></a>
   </div></section>
 
  <section id="armada"><div class="armada"><div class="ad">Armada<small>de</small>Dumbledore</div>
   <p class="arm-sub">Para quem é membro do canal no YouTube</p>
   <div class="passos"><div><em>1</em><b>Vire membro</b><small>No botão Seja membro do canal</small></div><div><em>2</em><b>Entre no app</b><small>Com a mesma conta Google</small></div><div><em>3</em><b>Pronto</b><small>O app reconhece e libera</small></div></div>
   <div class="bens"><span>Selo da Armada no fórum</span><span>Os benefícios que o Caco liberar para membros</span></div>
-  <a class="btn sec" href="https://www.youtube.com/channel/UCkhfuyQUD5GNulpQRJOqrGg/join" target="_blank">Seja membro no YouTube</a>
+  <a class="btn sec" href="https://www.youtube.com/channel/UCkhfuyQUD5GNulpQRJOqrGg/join" target="_blank" rel="noopener noreferrer">Seja membro no YouTube</a>
   <div class="sep-p"></div>
   <small class="pl-k">PLANO PRO DO APP</small><h3 class="pl-n">Ordem da Fênix</h3><p class="arm-sub">A IA do Caldeirão para ir mais fundo no mundo bruxo</p><div class="preco">R$ 19,90 <span>por mês</span></div>
   <div class="pl-g"><div><b>Pergunte ao acervo</b><small>O vídeo do Caco abre no minuto da resposta</small></div><div><b>Teoria no tribunal</b><small>Livros, J.K. Rowling e Caco, a favor e contra</small></div><div><b>Explicar trecho</b><small>Entenda uma passagem do seu livro, sem spoiler</small></div><div><b>Quiz do capítulo</b><small>Perguntas sobre o capítulo que você está lendo</small></div></div>
@@ -162,9 +163,10 @@ dialog p{color:var(--soft);font-size:14px}
 const EMAIL_PARC="";
 (()=>{const c=document.getElementById("ceu");for(let i=0;i<90;i++){const s=document.createElement("i");s.style.left=Math.random()*100+"%";s.style.top=Math.random()*100+"%";s.style.animationDelay=Math.random()*3+"s";c.appendChild(s)}})();
 const th=id=>`https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-fetch("data/videos.json?"+Date.now()).then(r=>r.json()).then(L=>{document.getElementById("ult").innerHTML=L.map(v=>`<a class="vc" href="https://www.youtube.com/watch?v=${v.id}" target="_blank"><div class="th" style="background-image:url('${th(v.id)}')"></div><b>${v.t}</b><small>${/^\d{4}-/.test(v.p)?v.p.split("-").reverse().join("/"):v.p}</small></a>`).join("")}).catch(()=>{});
+const escH=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+fetch("data/videos.json?"+Date.now()).then(r=>r.json()).then(L=>{document.getElementById("ult").innerHTML=L.filter(v=>/^[\w-]{11}$/.test(v.id)).map(v=>`<a class="vc" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener noreferrer"><div class="th" style="background-image:url('${th(v.id)}')"></div><b>${escH(v.t)}</b><small>${escH(/^\d{4}-/.test(v.p)?v.p.split("-").reverse().join("/"):v.p)}</small></a>`).join("")}).catch(()=>{});
 const REELS=["DfkPNwSq0Kd","Dfh6OMiKXkL","DfhyZKNKWcF","Dfhlf39qa1a","DfaaO5xK2j7"];
-document.getElementById("rls").innerHTML=REELS.map(c=>`<div class="rl"><iframe loading="lazy" src="https://www.instagram.com/p/${c}/embed/" scrolling="no" tabindex="-1"></iframe><a href="https://www.instagram.com/reel/${c}/" target="_blank" aria-label="Abrir no Instagram"></a></div>`).join("");
+document.getElementById("rls").innerHTML=REELS.map(c=>`<div class="rl"><iframe loading="lazy" src="https://www.instagram.com/p/${c}/embed/" scrolling="no" tabindex="-1"></iframe><a href="https://www.instagram.com/reel/${c}/" target="_blank" rel="noopener noreferrer" aria-label="Abrir no Instagram"></a></div>`).join("");
 function escala(){document.querySelectorAll(".rl").forEach(el=>{const s=el.clientHeight/560;const x=(el.clientWidth-326*s)/2;el.querySelector("iframe").style.transform=`translate(${x}px,${-54*s}px) scale(${s})`})}
 addEventListener("resize",escala);setInterval(escala,1500);
 document.getElementById("fp").onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);
