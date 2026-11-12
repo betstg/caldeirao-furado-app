@@ -8,7 +8,7 @@ button{width:100%;height:48px;border:0;border-radius:14px;background:linear-grad
 <body><form id="f"><h1>Caldeirão App</h1><p>Protótipo privado. Digite a senha de acesso.</p><input id="s" type="password" placeholder="Senha" autocomplete="current-password" autofocus><label><input type="checkbox" id="l" checked>Lembrar neste aparelho</label><button>Entrar</button><div class="er" id="e"></div></form>
 <script>
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function abre(senha,lembrar){const d=await (await fetch("app.enc?v=1794463661")).json();const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(senha),"PBKDF2",false,["deriveKey"]);
+async function abre(senha,lembrar){const d=await (await fetch("app.enc?v=1794463993")).json();const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(senha),"PBKDF2",false,["deriveKey"]);
  const k=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(d.s),iterations:d.n,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
  const html=new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(d.i)},k,b64(d.c)));
  try{if(lembrar)localStorage.setItem("cf-acesso",senha);else sessionStorage.setItem("cf-acesso",senha)}catch(e){}
