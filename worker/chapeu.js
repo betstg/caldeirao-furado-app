@@ -5,6 +5,7 @@
 
 const ORIGENS = ["https://betstg.github.io"];
 const MODELO = "claude-haiku-5-5";
+const MODELO_GRATIS = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"; // IA do Cloudflare, usada enquanto não tem chave da Anthropic
 const LIM_IP_HORA = 30;   // perguntas por pessoa por hora
 const LIM_DIA = 400;      // perguntas no app inteiro por dia
 
@@ -15,7 +16,7 @@ Responda de forma curta. No máximo uns 120 palavras, em frases simples. Nada de
 Só fale do mundo bruxo de Harry Potter, dos livros, filmes, série da HBO, peças, jogos e do canal do Caco. Se perguntarem outra coisa, volte gentilmente para o mundo bruxo.
 Não invente fatos. Se não tiver certeza, diga que não tem certeza. Separe o que está nos livros do que é teoria de fã.
 Nunca diga o que o Caco falou num vídeo a menos que isso venha no contexto do app. Quando o contexto trouxer um vídeo do Caco, mencione que ele respondeu isso e que o vídeo aparece logo abaixo.
-Não copie trechos longos dos livros. No máximo uma frase curta entre aspas.
+Não copie trechos longos dos livros. Nunca invente citações. Não coloque frases entre aspas como se fossem dos livros, dos filmes ou de personagens. Conte com as suas palavras.
 Não conte spoilers além do que a pessoa perguntou.
 Chame a pessoa pelo apelido quando ele vier no contexto.`;
 
@@ -32,7 +33,7 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });
     if (!ORIGENS.includes(origem)) return json({ erro: "origem" }, 403, cors);
     if (req.method !== "POST") return json({ erro: "metodo" }, 405, cors);
-    if (!env.ANTHROPIC_API_KEY) return json({ erro: "sem_chave" }, 500, cors);
+    if (!env.ANTHROPIC_API_KEY && !env.AI) return json({ erro: "sem_chave" }, 500, cors);
 
     let corpo;
     try { corpo = await req.json(); } catch { return json({ erro: "json" }, 400, cors); }
@@ -65,6 +66,21 @@ export default {
       ]);
     }
 
+    const sistema = SISTEMA + (ctx ? "\n\nContexto do app para esta pergunta\n" + ctx : "");
+
+    // sem chave da Anthropic, usa a IA gratuita do Cloudflare
+    if (!env.ANTHROPIC_API_KEY) {
+      try {
+        const g = await env.AI.run(MODELO_GRATIS, { messages: [{ role: "system", content: sistema }, ...msgs], max_tokens: 600 });
+        const txt = String((g && g.response) || "").trim();
+        if (!txt) return json({ erro: "ia" }, 502, cors);
+        return json({ txt, motor: "cloudflare" }, 200, cors);
+      } catch (e) {
+        console.log("workers-ai", String(e).slice(0, 300));
+        return json({ erro: "ia" }, 502, cors);
+      }
+    }
+
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -75,7 +91,7 @@ export default {
       body: JSON.stringify({
         model: MODELO,
         max_tokens: 600,
-        system: SISTEMA + (ctx ? "\n\nContexto do app para esta pergunta\n" + ctx : ""),
+        system: sistema,
         messages: msgs,
       }),
     });
