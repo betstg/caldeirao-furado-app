@@ -20,6 +20,10 @@ Não copie trechos longos dos livros. Nunca invente citações. Não coloque fra
 Não conte spoilers além do que a pessoa perguntou.
 Chame a pessoa pelo apelido quando ele vier no contexto.`;
 
+const TRADUZ = `Você traduz nomes e termos do universo de Harry Potter da edição brasileira da Rocco para o original em inglês da Bloomsbury.
+Exemplos. Chave de Portal vira Portkey. Tiago vira James. Bichento vira Crookshanks. Grifinória vira Gryffindor. Pomo de Ouro vira Golden Snitch.
+Responda só com o termo em inglês, numa linha, sem aspas, sem explicação. Se não for um termo do mundo bruxo, traduza normalmente para o inglês.`;
+
 export default {
   async fetch(req, env) {
     const origem = req.headers.get("Origin") || "";
@@ -66,12 +70,14 @@ export default {
       ]);
     }
 
-    const sistema = SISTEMA + (ctx ? "\n\nContexto do app para esta pergunta\n" + ctx : "");
+    const traduz = corpo.modo === "traduz";
+    const sistema = traduz ? TRADUZ : SISTEMA + (ctx ? "\n\nContexto do app para esta pergunta\n" + ctx : "");
+    const maxT = traduz ? 60 : 600;
 
     // sem chave da Anthropic, usa a IA gratuita do Cloudflare
     if (!env.ANTHROPIC_API_KEY) {
       try {
-        const g = await env.AI.run(MODELO_GRATIS, { messages: [{ role: "system", content: sistema }, ...msgs], max_tokens: 600 });
+        const g = await env.AI.run(MODELO_GRATIS, { messages: [{ role: "system", content: sistema }, ...msgs], max_tokens: maxT });
         const txt = String((g && g.response) || "").trim();
         if (!txt) return json({ erro: "ia" }, 502, cors);
         return json({ txt, motor: "cloudflare" }, 200, cors);
@@ -90,7 +96,7 @@ export default {
       },
       body: JSON.stringify({
         model: MODELO,
-        max_tokens: 600,
+        max_tokens: maxT,
         system: sistema,
         messages: msgs,
       }),
