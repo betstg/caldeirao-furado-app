@@ -7,15 +7,26 @@ UA={"User-Agent":"Mozilla/5.0 (compatible; CaldeiraoApp/1.0)"}
 def get(u):return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=30).read()
 limpa=lambda t:re.sub(r"[<>]","",html.unescape(t or "")).strip()[:200]
 news=[]
+def itens(raw):
+    try:
+        r=ET.fromstring(raw);return [(it.findtext("title") or "",it.findtext("link") or "",it.findtext("pubDate") or "") for it in r.findall(".//item")]
+    except Exception:
+        t=raw.decode("utf-8","ignore");out=[]
+        for m in re.finditer(r"<item\b.*?</item>",t,re.S):
+            g=lambda tag:(re.search(r"<"+tag+r"[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</"+tag+">",m.group(0),re.S) or [None,""])[1]
+            out.append((g("title"),g("link"),g("pubDate")))
+        return out
 for k,u in FEEDS.items():
     try:
-        r=ET.fromstring(get(u))
-        for it in r.findall(".//item")[:8]:
-            link=(it.findtext("link") or "").strip()
+        raw=get(u);L=itens(raw);n=0
+        for t,link,pd in L[:8]:
+            link=link.strip()
+            if link.startswith("http://"):link="https://"+link[7:]
             if not link.startswith("https://"):continue
-            try:d=parsedate_to_datetime(it.findtext("pubDate")).date().isoformat()
+            try:d=parsedate_to_datetime(pd.strip()).date().isoformat()
             except Exception:d=""
-            news.append({"f":k,"t":limpa(it.findtext("title")),"u":link,"d":d})
+            news.append({"f":k,"t":limpa(t),"u":link,"d":d});n+=1
+        print(k,"itens",len(L),"usados",n,"bytes",len(raw),raw[:80])
     except Exception as e:print("falhou",k,e)
 ns={"a":"http://www.w3.org/2005/Atom","yt":"http://www.youtube.com/xml/schemas/2015"}
 papo=[];vids=[]
