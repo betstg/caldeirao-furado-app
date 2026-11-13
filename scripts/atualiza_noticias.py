@@ -9,7 +9,13 @@ limpa=lambda t:re.sub(r"[<>]","",html.unescape(t or "")).strip()[:200]
 news=[]
 def itens(raw):
     try:
-        r=ET.fromstring(raw);return [(it.findtext("title") or "",it.findtext("link") or "",it.findtext("pubDate") or "") for it in r.findall(".//item")]
+        r=ET.fromstring(raw);L=[(it.findtext("title") or "",it.findtext("link") or "",it.findtext("pubDate") or "") for it in r.findall(".//item")]
+        if not L:
+            A="{http://www.w3.org/2005/Atom}"
+            for e in r.findall(A+"entry"):
+                lk=next((l.get("href") for l in e.findall(A+"link") if l.get("rel") in (None,"alternate")),"")
+                L.append((e.findtext(A+"title") or "",lk or "",e.findtext(A+"published") or e.findtext(A+"updated") or ""))
+        return L
     except Exception:
         t=raw.decode("utf-8","ignore");out=[]
         for m in re.finditer(r"<item\b.*?</item>",t,re.S):
@@ -24,7 +30,7 @@ for k,u in FEEDS.items():
             if link.startswith("http://"):link="https://"+link[7:]
             if not link.startswith("https://"):continue
             try:d=parsedate_to_datetime(pd.strip()).date().isoformat()
-            except Exception:d=""
+            except Exception:d=pd.strip()[:10] if re.match(r"\d{4}-\d{2}-\d{2}",pd.strip()) else ""
             news.append({"f":k,"t":limpa(t),"u":link,"d":d});n+=1
         print(k,"itens",len(L),"usados",n,"bytes",len(raw),raw[:80])
     except Exception as e:print("falhou",k,e)
