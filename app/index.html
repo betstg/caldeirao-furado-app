@@ -13,7 +13,7 @@ const db=()=>new Promise((ok,er)=>{const q=indexedDB.open("cf-gate",1);q.onupgra
 const kGet=async()=>{try{const d=await db();return await new Promise(ok=>{const q=d.transaction("k").objectStore("k").get("k");q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}};
 const kPut=async k=>{try{const d=await db();d.transaction("k","readwrite").objectStore("k").put(k,"k")}catch(e){}};
 const kDel=async()=>{try{const d=await db();d.transaction("k","readwrite").objectStore("k").delete("k")}catch(e){}};
-let D=null;const dados=async()=>D||(D=await (await fetch("app.enc?v=1794532670",{cache:"no-store"})).json());
+let D=null;const dados=async()=>D||(D=await (await fetch("app.enc?v=1794534393",{cache:"no-store"})).json());
 async function chave(senha){const d=await dados();const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(senha),"PBKDF2",false,["deriveKey"]);
  return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(d.s),iterations:d.n,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"])}
 async function abre(k){const d=await dados();const html=new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(d.i)},k,b64(d.c)));
